@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/gorilla/handlers"
@@ -19,11 +20,14 @@ func main() {
 	//1 routing per 1 handler
 	r.Handle("/health", HealthHandler).Methods("GET")
 	r.Handle("/user", GetUserHandler).Methods("GET")
+	r.Handle("/user", CreateUserHandler).Methods("POST")
 
 	//วิธีกำหนดคนเข้าถึงกรณีเรียกใช้งานข้าม IP
 	corsObj := handlers.AllowedOrigins([]string{"*"})
+	method := handlers.AllowedMethods([]string{"POST"})
+	header := handlers.AllowedHeaders([]string{"Content-Type", "X-Requested-With"})
 
-	http.ListenAndServe(":3001", handlers.CORS(corsObj)(r))
+	http.ListenAndServe(":3001", handlers.CORS(corsObj, method, header)(r))
 }
 
 // HealthHandler return api health
@@ -35,5 +39,17 @@ var HealthHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request
 var GetUserHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	user := User{Username: "ploy", Email: "chonnikan@gmail.com"}
 	response, _ := json.Marshal(user)
+
+	//ให้ส่งข้อมูลกลับในรูปแบบ json
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(response))
+})
+
+var CreateUserHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	var user User
+	body, _ := ioutil.ReadAll(r.Body)
+	json.Unmarshal(body, &user)
+	response := "created user: " + user.Username + " email: " + user.Email
+
 	w.Write([]byte(response))
 })
