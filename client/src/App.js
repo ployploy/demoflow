@@ -8,8 +8,11 @@ class App extends Component {
 
     this.state = {
       health: "",
-      user: {}
+      user: {},
+      createResult: ""
     };
+
+    this.createUser = this.createUser.bind(this);
   }
 
   componentDidMount() {
@@ -26,6 +29,25 @@ class App extends Component {
     });
   }
 
+  createUser(){
+    fetch('http://localhost:3001/user', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: 'ploynaka',
+        email: 'ploynaka@gmail.com',
+      })
+    })
+    .then(result => result.text())
+    .then(data => {
+      console.log(data);
+      this.setState({ createResult: data });
+    });
+  }
+
   render() {
     return (
       <div className="App">
@@ -34,7 +56,9 @@ class App extends Component {
           <h1 className="App-title">Server status: {this.state.health}</h1>
         </header>
         <h2>Username: {this.state.user.username}</h2>
-          <h2>Email: {this.state.user.email}</h2>
+        <h2>Email: {this.state.user.email}</h2>
+        <button onClick={this.createUser}>Create user</button>
+        <h2>{this.state.createResult}</h2>
         <p className="App-intro">
           To get started, edit <code>src/App.js</code> and save to reload.
         </p>
