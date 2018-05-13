@@ -2,7 +2,6 @@ package main
 
 import (
 	"net/http"
-	"os"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -15,7 +14,10 @@ func main() {
 	r.Handle("/health", HealthHandler).Methods("GET")
 	r.Handle("/users", GetUserHandler).Methods("GET")
 
-	http.ListenAndServe(":3000", handlers.LoggingHandler(os.Stdout, r))
+	//วิธีกำหนดคนเข้าถึงกรณีเรียกใช้งานข้าม IP
+	corsObj := handlers.AllowedOrigins([]string{"*"})
+
+	http.ListenAndServe(":3001", handlers.CORS(corsObj)(r))
 }
 
 // HealthHandler return api health
